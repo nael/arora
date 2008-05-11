@@ -70,6 +70,7 @@
 #include "browserapplication.h"
 #include "clearprivatedata.h"
 #include "downloadmanager.h"
+#include "extensionmanager.h"
 #include "history.h"
 #include "languagemanager.h"
 #include "networkaccessmanager.h"
@@ -666,6 +667,11 @@ void BrowserMainWindow::setupMenu()
     settings.beginGroup(QLatin1String("websettings"));
     m_toolsEnableInspector->setChecked(settings.value(QLatin1String("enableInspector"), false).toBool());
     m_toolsMenu->addAction(m_toolsEnableInspector);
+    
+    ExtensionManager *extensionManager = BrowserApplication::extensionManager();
+    m_toolsMenu->addActions(extensionManager->getActionsForMenu(QLatin1String("MainWindow_ToolsMenu")));
+    connect(extensionManager, SIGNAL(installExtension(Extension *)),
+            this, SLOT(installExtension(Extension *)));
 
     // Help
     m_helpMenu = new QMenu(menuBar());
@@ -762,6 +768,11 @@ void BrowserMainWindow::retranslate()
     updateStatusbarActionText(m_viewStatusbarAction->isVisible());
     updateToolbarActionText(m_viewToolbarAction->isVisible());
     updateBookmarksToolbarActionText(m_viewBookmarkBarAction->isVisible());
+}
+
+void BrowserMainWindow::installExtension(Extension *extension)
+{
+    m_toolsMenu->addActions(extension->actions(QLatin1String("MainWindow_ToolsMenu")));
 }
 
 void BrowserMainWindow::setupToolBar()

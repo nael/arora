@@ -12,7 +12,7 @@ UI_DIR = .ui
 MOC_DIR = .moc
 OBJECTS_DIR = .obj
 
-QT += webkit network
+QT += webkit network script
 
 win32 {
     DEFINES += GITVERSION=0
@@ -102,6 +102,7 @@ SOURCES += \
     webviewsearch.cpp \
     xbel.cpp
 
+include(extensions/extensions.pri)
 include(networkmonitor/networkmonitor.pri)
 include(cookiejar/cookiejar.pri)
 include(utils/utils.pri)
