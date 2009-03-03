@@ -87,10 +87,12 @@
 #include <qmenu.h>
 #include <qmessagebox.h>
 #include <qmovie.h>
+#include <qnetworkrequest.h>
 #include <qsettings.h>
 #include <qstackedwidget.h>
 #include <qstyle.h>
 #include <qtoolbutton.h>
+#include <qwebframe.h>
 
 #include <qdebug.h>
 
@@ -234,6 +236,18 @@ void TabWidget::clear()
     }
 }
 
+void TabWidget::reloadTabWithoutCache(int index)
+{
+    qDebug() << __FUNCTION__;
+    if (index < 0)
+        index = currentIndex();
+    if (index < 0 || index >= count())
+        return;
+
+    if (WebView *view = webView(index))
+        reloadView(view, false);
+}
+
 // When index is -1 index chooses the current tab
 void TabWidget::reloadTab(int index)
 {
@@ -242,8 +256,25 @@ void TabWidget::reloadTab(int index)
     if (index < 0 || index >= count())
         return;
 
-    if (WebView *tab = webView(index)) {
-        tab->reload();
+    if (WebView *view = webView(index))
+        reloadView(view);
+}
+
+
+void TabWidget::reloadView(WebView *view, bool useCache)
+{
+    qDebug() << __FUNCTION__ << view << useCache;
+    if (useCache) {
+        view->reload();
+    } else {
+#ifdef WEBKIT_TRUNK
+        view->page()->triggerAction(QWebPage::ReloadAndBypassCache);
+#else
+        QNetworkRequest request(view->url());
+        request.setAttribute(QNetworkRequest::CacheLoadControlAttribute,
+                                QNetworkRequest::AlwaysNetwork);
+        view->page()->mainFrame()->load(request);
+#endif
     }
 }
 
@@ -545,8 +576,8 @@ void TabWidget::toolBarVisibilityChangeRequestedCheck(bool visible)
 void TabWidget::reloadAllTabs()
 {
     for (int i = 0; i < count(); ++i) {
-        if (WebView *tab = webView(i)) {
-            tab->reload();
+        if (WebView *view = webView(i)) {
+            reloadView(view);
         }
     }
 }

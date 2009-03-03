@@ -164,6 +164,7 @@ public slots:
     void cloneTab(int index = -1);
     void closeTab(int index = -1);
     void closeOtherTabs(int index);
+    void reloadTabWithoutCache(int index = -1);
     void reloadTab(int index = -1);
     void reloadAllTabs();
     void nextTab();
@@ -171,6 +172,7 @@ public slots:
     void bookmarkTabs();
 
 private slots:
+    void reloadView(WebView *view, bool useCache = true);
     void currentChanged(int index);
     void openLastTab();
     void aboutToShowRecentTabsMenu();

@@ -609,6 +609,10 @@ void BrowserMainWindow::setupMenu()
     m_viewReloadAction->setShortcuts(shortcuts);
     m_tabWidget->addWebAction(m_viewReloadAction, QWebPage::Reload);
     m_viewMenu->addAction(m_viewReloadAction);
+    new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_F5),
+                  m_tabWidget, SLOT(reloadTabWithoutCache()));
+    new QShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_R),
+                  m_tabWidget, SLOT(reloadTabWithoutCache()));
 
     m_viewZoomInAction = new QAction(m_viewMenu);
     shortcuts.clear();
