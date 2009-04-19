@@ -103,7 +103,7 @@ void RssButton::loadFinished(bool ok)
 
     QVariantList list = m_webView->page()->mainFrame()->evaluateJavaScript(m_script).toList();
     m_feeds.clear();
-    foreach(const QVariant &variant, list) {
+    foreach (const QVariant &variant, list) {
         QVariantMap map = variant.toMap();
         QString rel = (map[QLatin1String("rel")]).toString();
         if (rel != QLatin1String("alternate"))
