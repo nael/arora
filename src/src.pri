@@ -56,7 +56,6 @@ HEADERS += \
     schemeaccesshandler.h \
     searchbar.h \
     searchbutton.h \
-    searchlineedit.h \
     settings.h \
     sourcehighlighter.h \
     sourceviewer.h \
@@ -83,7 +82,6 @@ SOURCES += \
     schemeaccesshandler.cpp \
     searchbar.cpp \
     searchbutton.cpp \
-    searchlineedit.cpp \
     settings.cpp \
     sourcehighlighter.cpp \
     sourceviewer.cpp \
@@ -94,6 +92,25 @@ SOURCES += \
     webpage.cpp \
     webview.cpp \
     webviewsearch.cpp
+
+
+mac {
+    OBJECTIVE_SOURCES += searchlineedit_mac.mm
+    HEADERS += searchlineedit_mac.h
+    LIBS += -framework Cocoa
+}
+!mac {
+    HEADERS += searchlineedit.h
+    SOURCES += searchlineedit.cpp
+}
+
+# install
+mac {
+target.path = $$[QT_INSTALL_DEMOS]/macmainwindow
+sources.files = $$SOURCES  *.pro *.html
+sources.path = $$[QT_INSTALL_DEMOS]/macmainwindow
+INSTALLS += target sources
+}
 
 include(bookmarks/bookmarks.pri)
 include(cookiejar/cookiejar.pri)
