@@ -315,6 +315,26 @@ void BrowserApplication::loadSettings()
     defaultSettings->setUserStyleSheetUrl(url);
 
     settings.endGroup();
+
+#if QT_VERSION >= 0x040500
+    defaultSettings->setAttribute(QWebSettings::OfflineWebApplicationCacheEnabled, true);
+    defaultSettings->setAttribute(QWebSettings::OfflineStorageDatabaseEnabled, true);
+
+    int storageSize = settings.value(QLatin1String("storageSize"), 5).toInt();
+
+    // offline
+    if (storageSize == 0) {
+        defaultSettings->setAttribute(QWebSettings::LocalStorageDatabaseEnabled, false);
+    } else {
+        defaultSettings->setAttribute(QWebSettings::LocalStorageDatabaseEnabled, true);
+        QString directory = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+        if (directory.isEmpty())
+            directory = QDir::homePath() + QLatin1String("/.") + QCoreApplication::applicationName();
+        directory += QLatin1String("/database_storage");
+        defaultSettings->setOfflineStorageDefaultQuota(storageSize * 1024);
+        defaultSettings->setOfflineStoragePath(directory);
+    }
+#endif
 }
 
 QList<BrowserMainWindow*> BrowserApplication::mainWindows()

@@ -183,6 +183,17 @@ void SettingsDialog::loadFromSettings()
     enableImages->setChecked(settings.value(QLatin1String("enableImages"), enableImages->isChecked()).toBool());
     userStyleSheet->setText(QString::fromUtf8(settings.value(QLatin1String("userStyleSheet")).toUrl().toEncoded()));
     clickToFlash->setChecked(settings.value(QLatin1String("enableClickToFlash"), clickToFlash->isChecked()).toBool());
+    int storageSize = settings.value(QLatin1String("storageSize"), 5).toInt();
+    switch (storageSize) {
+    default:
+    case 0: storageSize = 0; break;
+    case 5: storageSize = 1; break;
+    case 10: storageSize = 2; break;
+    case 50: storageSize = 3; break;
+    case 100: storageSize = 4; break;
+    case 500: storageSize = 5; break;
+    }
+    databaseSize->setCurrentIndex(storageSize);
     settings.endGroup();
 
     // Privacy
@@ -304,6 +315,18 @@ void SettingsDialog::saveToSettings()
     else
         settings.setValue(QLatin1String("userStyleSheet"), QUrl::fromEncoded(userStyleSheetString.toUtf8()));
     settings.setValue(QLatin1String("enableClickToFlash"), clickToFlash->isChecked());
+
+    int storageSize = databaseSize->currentIndex();
+    switch (storageSize) {
+    default:
+    case 0: storageSize = 0; break;
+    case 1: storageSize = 5; break;
+    case 2: storageSize = 10; break;
+    case 3: storageSize = 50; break;
+    case 4: storageSize = 100; break;
+    case 5: storageSize = 500; break;
+    }
+    settings.setValue(QLatin1String("storageSize"), storageSize);
     settings.endGroup();
 
     // Privacy
