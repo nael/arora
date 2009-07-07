@@ -63,4 +63,35 @@ private:
     QBuffer buffer;
 };
 
+class FeedAccessHandler : public SchemeAccessHandler
+{
+public:
+    FeedAccessHandler(QObject *parent = 0);
+
+    virtual QNetworkReply *createRequest(QNetworkAccessManager::Operation op, const QNetworkRequest &request, QIODevice *outgoingData = 0);
+};
+
+class FeedAccessReply : public QNetworkReply
+{
+    Q_OBJECT
+
+public:
+    FeedAccessReply(QNetworkReply *r, const QNetworkRequest &request, QObject *parent = 0);
+    //~FeedAccessReply();
+
+    virtual qint64 bytesAvailable() const;
+    virtual void abort() { };
+    virtual void close();
+
+private slots:
+    void bfinished();
+
+protected:
+    virtual qint64 readData(char *data, qint64 maxSize);
+
+private:
+    QNetworkReply *backendReply;
+    QBuffer buffer;
+};
+
 #endif // SCHEMEACCESSHANDLER_H

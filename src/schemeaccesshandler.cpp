@@ -18,6 +18,8 @@
  */
 
 #include "schemeaccesshandler.h"
+#include "browserapplication.h"
+#include "networkaccessmanager.h"
 
 #include <qapplication.h>
 #include <qcryptographichash.h>
@@ -30,10 +32,81 @@
 #include <qtimer.h>
 #include <qwebsettings.h>
 
+
 SchemeAccessHandler::SchemeAccessHandler(QObject *parent)
     : QObject(parent)
 {
 }
+
+FeedAccessHandler::FeedAccessHandler(QObject *parent)
+    : SchemeAccessHandler(parent)
+{
+}
+
+QNetworkReply *FeedAccessHandler::createRequest(QNetworkAccessManager::Operation op, const QNetworkRequest &request, QIODevice *outgoingData)
+{
+    QNetworkRequest plainRequest = request;
+    QUrl url = plainRequest.url();
+    if (url.toEncoded().mid(7).startsWith("http")) {
+        url = QUrl::fromEncoded(url.toEncoded().mid(7));
+    } else {
+        url.setScheme(QLatin1String("http"));
+    }
+    plainRequest.setUrl(url);
+
+    QNetworkReply *plainReply = BrowserApplication::networkAccessManager()->createRequest(op, plainRequest, outgoingData);
+    FeedAccessReply *reply = new FeedAccessReply(plainReply, request, this);
+    return reply;
+}
+
+
+FeedAccessReply::FeedAccessReply(QNetworkReply *r, const QNetworkRequest &request, QObject *parent)
+    : QNetworkReply(parent)
+    , backendReply(r)
+{
+    connect(r, SIGNAL(finished()), this, SLOT(bfinished()));
+    setOperation(r->operation());
+    setRequest(request);
+    setUrl(request.url());
+
+    setError(QNetworkReply::NoError, tr("No Error"));
+    open(QIODevice::ReadOnly);
+}
+
+void FeedAccessReply::bfinished()
+{
+    buffer.setData(backendReply->readAll());
+    buffer.open(QIODevice::ReadWrite);
+    qDebug() << "finished" << buffer.size() << url() << backendReply->url() << backendReply->errorString();
+
+
+    setHeader(QNetworkRequest::ContentTypeHeader, QByteArray("text/html"));
+    setHeader(QNetworkRequest::ContentLengthHeader, buffer.bytesAvailable());
+    setAttribute(QNetworkRequest::HttpStatusCodeAttribute, 200);
+    setAttribute(QNetworkRequest::HttpReasonPhraseAttribute, QByteArray("Ok"));
+    emit metaDataChanged();
+
+    emit downloadProgress(buffer.size(), buffer.size());
+    emit readyRead();
+    emit finished();
+}
+
+qint64 FeedAccessReply::bytesAvailable() const
+{
+    return buffer.bytesAvailable() + QNetworkReply::bytesAvailable();
+}
+
+void FeedAccessReply::close()
+{
+    return backendReply->close();
+}
+
+qint64 FeedAccessReply::readData(char *data, qint64 maxSize)
+{
+    qDebug() << "Reading" << maxSize;
+    return buffer.read(data, maxSize);
+}
+
 
 
 FileAccessHandler::FileAccessHandler(QObject *parent)

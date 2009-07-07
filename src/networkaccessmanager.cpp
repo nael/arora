@@ -132,6 +132,7 @@ NetworkAccessManager::NetworkAccessManager(QObject *parent)
 
     // Register custom scheme handlers
     setSchemeHandler(QLatin1String("file"), new FileAccessHandler(this));
+    setSchemeHandler(QLatin1String("feed"), new FeedAccessHandler(this));
 }
 
 void NetworkAccessManager::setSchemeHandler(const QString &scheme, SchemeAccessHandler *handler)
