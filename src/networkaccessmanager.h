@@ -66,6 +66,7 @@
 #include <qnetworkaccessmanager.h>
 #include <qnetworkproxy.h>
 #include <qsslconfiguration.h>
+#include "networkaccesspolicy.h"
 
 class SchemeAccessHandler;
 
@@ -84,6 +85,7 @@ private:
     QNetworkProxy m_globalProxy;
 };
 
+class NetworkAccessPolicy;
 class NetworkAccessManager : public QNetworkAccessManager
 {
     Q_OBJECT
@@ -93,6 +95,9 @@ signals:
 
 public:
     NetworkAccessManager(QObject *parent = 0);
+    void setAccessPolicy(NetworkAccessPolicy *policy);
+    NetworkAccessPolicy *accessPolicy() const;
+
     void setSchemeHandler(const QString &scheme, SchemeAccessHandler *handler);
 
 protected:
@@ -116,6 +121,7 @@ private:
 
     QByteArray m_acceptLanguage;
     QHash<QString, SchemeAccessHandler*> m_schemeHandlers;
+    NetworkAccessPolicy *m_accessPolicy;
 };
 
 #endif // NETWORKACCESSMANAGER_H

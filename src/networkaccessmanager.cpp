@@ -63,9 +63,11 @@
 #include "networkaccessmanager.h"
 
 #include "acceptlanguagedialog.h"
+#include "blockednetworkreply.h"
 #include "browserapplication.h"
 #include "browsermainwindow.h"
 #include "schemeaccesshandler.h"
+#include "networkaccesspolicy.h"
 #include "ui_passworddialog.h"
 #include "ui_proxy.h"
 
@@ -112,6 +114,7 @@ QList<QNetworkProxy> NetworkProxyFactory::queryProxy(const QNetworkProxyQuery &q
 
 NetworkAccessManager::NetworkAccessManager(QObject *parent)
     : QNetworkAccessManager(parent)
+    , m_accessPolicy(0)
 {
     connect(this, SIGNAL(authenticationRequired(QNetworkReply*, QAuthenticator*)),
             SLOT(authenticationRequired(QNetworkReply*, QAuthenticator*)));
@@ -132,6 +135,22 @@ NetworkAccessManager::NetworkAccessManager(QObject *parent)
 void NetworkAccessManager::setSchemeHandler(const QString &scheme, SchemeAccessHandler *handler)
 {
     m_schemeHandlers.insert(scheme, handler);
+}
+
+void NetworkAccessManager::setAccessPolicy(NetworkAccessPolicy *policy)
+{
+    if (m_accessPolicy)
+        delete m_accessPolicy;
+
+    if (policy)
+        policy->setParent(this);
+
+    m_accessPolicy = policy;
+}
+
+NetworkAccessPolicy *NetworkAccessManager::accessPolicy() const
+{
+    return m_accessPolicy;
 }
 
 void NetworkAccessManager::loadSettings()
@@ -363,13 +382,18 @@ QNetworkReply *NetworkAccessManager::createRequest(QNetworkAccessManager::Operat
     if (reply)
         return reply;
 
-    if (!m_acceptLanguage.isEmpty()) {
-        QNetworkRequest req = request;
-        req.setRawHeader("Accept-Language", m_acceptLanguage);
-        reply = QNetworkAccessManager::createRequest(op, req, outgoingData);
-        emit requestCreated(op, req, reply);
+    if (m_accessPolicy->allowedToConnect(request)) {
+        if (!m_acceptLanguage.isEmpty()) {
+            QNetworkRequest req = request;
+            req.setRawHeader("Accept-Language", m_acceptLanguage);
+            reply = QNetworkAccessManager::createRequest(op, req, outgoingData);
+            emit requestCreated(op, req, reply);
+        } else {
+            reply = QNetworkAccessManager::createRequest(op, request, outgoingData);
+            emit requestCreated(op, request, reply);
+        }
     } else {
-        reply = QNetworkAccessManager::createRequest(op, request, outgoingData);
+        reply = new BlockedNetworkReply(op, request);
         emit requestCreated(op, request, reply);
     }
 

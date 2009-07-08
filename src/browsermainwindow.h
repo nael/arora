@@ -167,6 +167,7 @@ private slots:
     void geometryChangeRequested(const QRect &geometry);
     void updateToolbarActionText(bool visible);
     void updateBookmarksToolbarActionText(bool visible);
+    void showAdblockConfig();
 
 private:
     void retranslate();
@@ -233,6 +234,7 @@ private:
     QAction *m_toolsWebSearchAction;
     QAction *m_toolsClearPrivateDataAction;
     QAction *m_toolsEnableInspector;
+    QAction *m_adblockConfigAction;
 
     QMenu *m_helpMenu;
     QAction *m_helpChangeLanguageAction;
