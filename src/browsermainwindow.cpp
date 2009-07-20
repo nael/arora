@@ -918,6 +918,9 @@ void BrowserMainWindow::setupToolBar()
 {
     setUnifiedTitleAndToolBarOnMac(true);
     m_navigationBar = new QToolBar(this);
+#if QT_VERSION >= 0x040600
+    m_navigationBar->setToolButtonStyle(Qt::ToolButtonFollowStyle)
+#endif
     addToolBar(m_navigationBar);
     connect(m_navigationBar->toggleViewAction(), SIGNAL(toggled(bool)),
             this, SLOT(updateToolbarActionText(bool)));
