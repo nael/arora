@@ -92,6 +92,7 @@
 #include <qstackedwidget.h>
 #include <qstyle.h>
 #include <qtoolbutton.h>
+#include <qwebhistory.h>
 
 #include <qdebug.h>
 
@@ -1101,19 +1102,29 @@ QByteArray TabWidget::saveState() const
     stream << qint32(version);
 
     QStringList tabs;
+    QList<QByteArray> tabsHistory;
     for (int i = 0; i < count(); ++i) {
         if (!m_swappedDelayedWidget) {
             tabs.append(QString::null);
+            tabsHistory.append(QByteArray());
             continue;
         }
         if (WebView *tab = webView(i)) {
             tabs.append(QString::fromUtf8(tab->url().toEncoded()));
+#if QT_VERSION < 0x040600
+            tabsHistory.append(QByteArray());
+#else
+            tabsHistory.append(tab->history()->saveState());
+#endif
         } else {
             tabs.append(QString::null);
+            tabsHistory.append(QByteArray());
         }
     }
     stream << tabs;
     stream << currentIndex();
+    stream << tabsHistory;
+
     return data;
 }
 
@@ -1134,15 +1145,27 @@ bool TabWidget::restoreState(const QByteArray &state)
 
     QStringList openTabs;
     stream >> openTabs;
-    for (int i = 0; i < openTabs.count(); ++i) {
-        QUrl url = QUrl::fromEncoded(openTabs.at(i).toUtf8());
-        loadUrl(url, i == 0 && currentWebView()->url() == QUrl() ? CurrentTab : NewTab);
-    }
+
 
     int currentTab;
     stream >> currentTab;
     setCurrentIndex(currentTab);
 
+    QList<QByteArray> tabHistory;
+    stream >> tabHistory;
+    for (int i = 0; i < openTabs.count(); ++i) {
+        QUrl url = QUrl::fromEncoded(openTabs.at(i).toUtf8());
+        TabWidget::OpenUrlIn tab = i == 0 && currentWebView()->url() == QUrl() ? CurrentTab : NewTab;
+        WebView *webView = getView(tab, currentWebView());
+        if (webView) {
+#if QT_VERSION > 0x040500
+            int tabIndex = count() -1;
+            if (tabIndex >= 0 && tabIndex < tabHistory.count())
+                webView->history()->restoreState(tabHistory.at(tabIndex));
+#endif
+            webView->loadUrl(url);
+        }
+    }
     return true;
 }
 
