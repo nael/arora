@@ -33,7 +33,7 @@ class FilterSelector : public QObject
 public:
     FilterSelector(bool exceptionRules, QObject *parent = 0);
 
-    const UrlAccessRule *get(QString url) const;
+    const UrlAccessRule *get(const QString &url) const;
 
     void setRules(QList<UrlAccessRule*> *rules);
 
