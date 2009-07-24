@@ -1,5 +1,6 @@
 /*
  * Copyright 2009 Zsombor Gegesy <gzsombor@gmail.com>
+ * Copyright 2009 Benjamin Meyer <ben@meyerhome.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,13 +20,25 @@
 
 #include "filtersubscription.h"
 
-FilterSubscription::FilterSubscription(int index, const QString &name, const QString &source, const QDate &lastFetch, bool enabled)
-    : m_index(index)
-    , m_name(name)
-    , m_sourceUrl(source)
-    , m_lastFetchDate(lastFetch)
-    , m_enabled(enabled)
+FilterSubscription::FilterSubscription()
+    : m_priority(0)
+    , m_enabled(false)
 {
+}
+
+void FilterSubscription::setPriority(int priority)
+{
+    m_priority = priority;
+}
+
+int FilterSubscription::priority() const
+{
+    return m_priority;
+}
+
+void FilterSubscription::setName(const QString &name)
+{
+    m_name = name;
 }
 
 QString FilterSubscription::name() const
@@ -33,24 +46,24 @@ QString FilterSubscription::name() const
     return m_name;
 }
 
-QString FilterSubscription::url() const
+void FilterSubscription::setUrl(const QUrl &url)
 {
-    return m_sourceUrl;
+    m_url = url.toEncoded();
 }
 
-QDate FilterSubscription::lastFetchDate() const
+QUrl FilterSubscription::url() const
 {
-    return m_lastFetchDate;
+    return QUrl::fromEncoded(m_url);
 }
 
-bool FilterSubscription::isEnabled() const
+void FilterSubscription::setLastFetchedDate(const QDate &date)
 {
-    return m_enabled;
+    m_lastFetchedDate = date;
 }
 
-int FilterSubscription::index() const
+QDate FilterSubscription::lastFetchedDate() const
 {
-    return m_index;
+    return m_lastFetchedDate;
 }
 
 void FilterSubscription::setEnabled(bool enabled)
@@ -58,7 +71,37 @@ void FilterSubscription::setEnabled(bool enabled)
     m_enabled = enabled;
 }
 
-void FilterSubscription::setLastFetchDate(const QDate &date)
+bool FilterSubscription::isEnabled() const
 {
-    m_lastFetchDate = date;
+    return m_enabled;
+}
+
+QDataStream &operator>>(QDataStream &in, FilterSubscription &subscription)
+{
+    FilterSubscription::load(in, subscription);
+    return in;
+}
+
+QDataStream &operator<<(QDataStream &out, const FilterSubscription &subscription)
+{
+    FilterSubscription::save(out, subscription);
+    return out;
+}
+
+void FilterSubscription::load(QDataStream &in, FilterSubscription &subscription)
+{
+    in >> subscription.m_priority;
+    in >> subscription.m_name;
+    in >> subscription.m_url;
+    in >> subscription.m_lastFetchedDate;
+    in >> subscription.m_enabled;
+}
+
+void FilterSubscription::save(QDataStream &out, const FilterSubscription &subscription)
+{
+    out << subscription.priority();
+    out << subscription.name();
+    out << subscription.m_url;
+    out << subscription.lastFetchedDate();
+    out << subscription.isEnabled();
 }

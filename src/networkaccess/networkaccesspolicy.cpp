@@ -203,7 +203,7 @@ const QList<UrlAccessRule*> *NetworkAccessPolicy::accessRules() const
 void NetworkAccessPolicy::setAccessRules(QList<UrlAccessRule*> &newRules)
 {
 #if defined(NETWORKACCESS_DEBUG)
-        qDebug() << "setAccessRules: " << newRules.size();
+        qDebug() << "NetworkAccessPolicy::" << __FUNCTION__ << newRules.size();
 #endif
     m_rules->clear();
     m_rules->append(newRules);
@@ -229,7 +229,7 @@ void NetworkAccessPolicy::setAccessRules(FilterSubscription *subscription, QList
 
     m_rules->append(newRules);
     m_acceptRules.rehash();
-    m_blockRules.rehash();;
+    m_blockRules.rehash();
     save();
 }
 
@@ -243,23 +243,41 @@ void NetworkAccessPolicy::subscriptionStateChanged()
 void NetworkAccessPolicy::load()
 {
 #if defined(NETWORKACCESS_DEBUG)
-    qDebug() << "NetworkAccessPolicy::load";
+    qDebug() << "NetworkAccessPolicy" << __FUNCTION__;
 #endif
     QSettings settings;
     settings.beginGroup(QLatin1String("networkAccessPolicy"));
-    m_enabled = settings.value(QLatin1String("enabled"),false).toBool();
-    int filterSize = settings.beginReadArray(QLatin1String("subscriptions"));
+    m_enabled = settings.value(QLatin1String("enabled"), false).toBool();
     m_subscriptions.clear();
+    QList<FilterSubscription> subscriptions = qvariant_cast<QList<FilterSubscription> >(settings.value(QLatin1String("subscriptions")));
+    foreach (const FilterSubscription &subscription, subscriptions)
+        m_subscriptions.append(new FilterSubscription(subscription));
+    if (!settings.contains(QLatin1String("subscriptions"))) {
+        // initialize
+        FilterSubscription *d1 = new FilterSubscription;
+        d1->setName(QLatin1String("EasyList (USA)"));
+        d1->setUrl(QString(QLatin1String("http://adblockplus.mozdev.org/easylist/easylist.txt")));
+        d1->setPriority(0);
 
-    for (int i = 0; i < filterSize; ++i) {
-        settings.setArrayIndex(i);
-        QString name = settings.value(QLatin1String("name")).toString();
-        QString url = settings.value(QLatin1String("url")).toString();
-        QDate lastFetch = settings.value(QLatin1String("lastFetch")).toDate();
-        bool enabled = settings.value(QLatin1String("enabled"), false).toBool();
-        m_subscriptions.append(new FilterSubscription(i, name, url, lastFetch, enabled));
+        FilterSubscription *d2 = new FilterSubscription;
+        d2->setName(QLatin1String("EasyList Germany"));
+        d2->setUrl(QString(QLatin1String("http://adblockplus.mozdev.org/easylist/ares+easylist.txt")));
+        d2->setPriority(1);
+
+        FilterSubscription *d3 = new FilterSubscription;
+        d3->setName(QLatin1String("Liste FR (France) + EasyList"));
+        d3->setUrl(QString(QLatin1String("http://adblockplus.mozdev.org/easylist/liste_fr+easylist.txt")));
+        d3->setPriority(2);
+
+        FilterSubscription *d4 = new FilterSubscription;
+        d4->setName(QLatin1String("Filter von Dr.Evil (Germany)"));
+        d4->setPriority(3);
+        d4->setUrl(QString(QLatin1String("http://maltekraus.de/Firefox/adblock.txt")));
+        m_subscriptions.append(d1);
+        m_subscriptions.append(d2);
+        m_subscriptions.append(d3);
+        m_subscriptions.append(d4);
     }
-    settings.endArray();
 
     int size = settings.beginReadArray(QLatin1String("rules"));
     m_rules->clear();
@@ -283,21 +301,6 @@ void NetworkAccessPolicy::load()
         m_rules->append(rule);
     }
     settings.endArray();
-
-    int version = settings.value(QLatin1String("ruleSetVersion"), 0).toInt();
-    if (version < 1) {
-        m_subscriptions.clear();
-        // initialize
-        m_subscriptions.append(new FilterSubscription(0, QLatin1String("EasyList (USA)"),
-            QLatin1String("http://adblockplus.mozdev.org/easylist/easylist.txt"), QDate(), false));
-        m_subscriptions.append(new FilterSubscription(1, QLatin1String("EasyList Germany"),
-            QLatin1String("http://adblockplus.mozdev.org/easylist/ares+easylist.txt"), QDate(), false));
-        m_subscriptions.append(new FilterSubscription(2, QLatin1String("Liste FR (France) + EasyList"),
-            QLatin1String("http://adblockplus.mozdev.org/easylist/liste_fr+easylist.txt"), QDate(), false));
-        m_subscriptions.append(new FilterSubscription(3, QLatin1String("Filter von Dr.Evil (Germany)"),
-            QLatin1String("http://maltekraus.de/Firefox/adblock.txt"), QDate(), false));
-
-    }
     settings.endGroup();
 
     m_acceptRules.rehash();
@@ -307,7 +310,7 @@ void NetworkAccessPolicy::load()
 void NetworkAccessPolicy::save()
 {
 #if defined(NETWORKACCESS_DEBUG)
-    qDebug()<< "NetworkAccessPolicy::save";
+    qDebug() << "NetworkAccessPolicy" << __FUNCTION__;
 #endif
     QSettings settings;
     settings.beginGroup(QLatin1String("networkAccessPolicy"));
@@ -326,24 +329,16 @@ void NetworkAccessPolicy::save()
 
         FilterSubscription *subscription = rule->filterSubscription();
         if (subscription)
-            index = subscription->index();
+            index = subscription->priority();
 
         settings.setValue(QLatin1String("subIndex"), index);
     }
     settings.endArray();
 
-    settings.beginWriteArray(QLatin1String("subscriptions"), m_subscriptions.size());
-    for (int i = 0; i < m_subscriptions.size(); ++i) {
-        settings.setArrayIndex(i);
-        FilterSubscription *subscription = m_subscriptions.at(i);
-        settings.setValue(QLatin1String("name"), subscription->name());
-        settings.setValue(QLatin1String("url"), subscription->url());
-        settings.setValue(QLatin1String("lastFetch"), subscription->lastFetchDate());
-        settings.setValue(QLatin1String("enabled"), subscription->isEnabled());
-    }
-    settings.endArray();
-
-    settings.setValue(QLatin1String("ruleSetVersion"), 1);
-
+    QList<FilterSubscription> subscriptions;
+    foreach (const FilterSubscription *subscription, m_subscriptions)
+        subscriptions.append(FilterSubscription(*subscription));
+    QVariant v = qVariantFromValue(subscriptions);
+    settings.setValue(QLatin1String("subscriptions"), v);
     settings.endGroup();
 }

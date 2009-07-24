@@ -1,5 +1,6 @@
 /*
  * Copyright 2009 Zsombor Gegesy <gzsombor@gmail.com>
+ * Copyright 2009 Benjamin Meyer <ben@meyerhome.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,30 +22,45 @@
 #define FILTERSUBSCRIPTION_H
 
 #include <qdatetime.h>
-#include <qobject.h>
-#include <qstring.h>
+#include <qurl.h>
+#include <qmetatype.h>
 
 class FilterSubscription
 {
 
 public:
-    FilterSubscription(int index, const QString &name, const QString &source, const QDate &lastFetch, bool enabled);
+    FilterSubscription();
 
+    int priority() const;
+    void setPriority(int priority);
+
+    void setName(const QString &name);
     QString name() const;
-    QString url() const;
-    QDate lastFetchDate() const;
-    bool isEnabled() const;
-    int index() const;
+
+    void setUrl(const QUrl &url);
+    QUrl url() const;
+
+    void setLastFetchedDate(const QDate &date);
+    QDate lastFetchedDate() const;
 
     void setEnabled(bool enabled);
-    void setLastFetchDate(const QDate &date);
+    bool isEnabled() const;
+
+    static void load(QDataStream &in, FilterSubscription &metaData);
+    static void save(QDataStream &out, const FilterSubscription &metaData);
 
 private:
-    int m_index;
+    int m_priority;
     QString m_name;
-    QString m_sourceUrl;
-    QDate m_lastFetchDate;
+    QByteArray m_url;
+    QDate m_lastFetchedDate;
     bool m_enabled;
 };
+
+QDataStream &operator<<(QDataStream &, const FilterSubscription &);
+QDataStream &operator>>(QDataStream &, FilterSubscription &);
+
+Q_DECLARE_METATYPE(FilterSubscription)
+Q_DECLARE_METATYPE(QList<FilterSubscription>)
 
 #endif // FILTERSUBSCRIPTION_H

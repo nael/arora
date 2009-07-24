@@ -55,15 +55,15 @@ void SubscriptionEditor::selectionChanged(const QModelIndex &current, const QMod
 
     FilterSubscription *filterSubs = m_model->at(current.row());
     nameField->setText(filterSubs->name());
-    urlField->setText(filterSubs->url());
-    dateEdit->setDate(filterSubs->lastFetchDate());
+    urlField->setText(QString::fromUtf8(filterSubs->url().toEncoded()));
+    dateEdit->setDate(filterSubs->lastFetchedDate());
     enableCheckBox->setChecked(filterSubs->isEnabled());
 }
 
 void SubscriptionEditor::on_fetchButton_clicked()
 {
 #if defined(NETWORKACCESS_DEBUG)
-    qDebug("fetch button clicked");
+    qDebug() << __FUNCTION__;
 #endif
     QModelIndexList selected = tableView->selectionModel()->selectedRows();
     foreach (const QModelIndex &index, selected) {

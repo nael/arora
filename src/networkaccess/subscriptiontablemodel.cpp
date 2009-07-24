@@ -59,7 +59,7 @@ QVariant SubscriptionTableModel::data(const QModelIndex &index, int role) const
         case 0:
             return QVariant(m_subscriptions.at(row)->name());
         case 1:
-            return QVariant(m_subscriptions.at(row)->lastFetchDate());
+            return QVariant(m_subscriptions.at(row)->lastFetchedDate());
         case 2:
             return QVariant(m_subscriptions.at(row)->isEnabled() ? tr("Enabled") : tr("Disabled"));
         }
