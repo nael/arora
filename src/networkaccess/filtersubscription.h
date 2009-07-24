@@ -49,6 +49,9 @@ public:
     static void load(QDataStream &in, FilterSubscription &metaData);
     static void save(QDataStream &out, const FilterSubscription &metaData);
 
+    // static void parseUrl(const QUrl &url);
+    // "abp:subscribe?location=http%3A%2F%2Feasylist.adblockplus.org%2Feasylist.txt&title=EasyList"
+
 private:
     int m_priority;
     QString m_name;
