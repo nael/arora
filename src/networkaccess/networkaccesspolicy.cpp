@@ -19,6 +19,8 @@
 
 #include "networkaccesspolicy.h"
 
+#include "filtersubscription.h"
+
 #include <qdesktopservices.h>
 #include <qfile.h>
 #include <qiodevice.h>

@@ -20,19 +20,17 @@
 #ifndef URLACCESSRULE_H
 #define URLACCESSRULE_H
 
-#include "filtersubscription.h"
-
 #include <qobject.h>
 #include <qregexp.h>
 #include <qurl.h>
 
-enum Decision {
-    Undecided, Allow, Deny
-};
-
+class FilterSubscription;
 class UrlAccessRule: public QObject
 {
 public:
+    enum Decision {
+        Undecided, Allow, Deny
+    };
     UrlAccessRule(bool wildcard, const QString &pattern, bool exception, int hitCount, bool enabled = true,
                   FilterSubscription *filterSubscription = 0, QObject *parent = 0);
     ~UrlAccessRule();
@@ -66,15 +64,13 @@ public:
     bool match(const QString &url) const;
 
 private:
-    QString m_pattern;
-    QRegExp *m_regexp;
+    bool m_enabled;
     bool m_exceptionRule;
     int m_hitCount;
-    bool m_enabled;
+    QString m_pattern;
+    QRegExp *m_regexp;
     FilterSubscription *m_subscription;
     QString *m_hash;
-
-
 };
 
 #endif // URLACCESSRULE_H

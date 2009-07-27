@@ -19,6 +19,8 @@
 
 #include "urlaccessrule.h"
 
+#include "filtersubscription.h"
+
 UrlAccessRule::UrlAccessRule(bool wildcard, const QString &pattern, bool exception, int hitCount, bool enabled,
                              FilterSubscription *filterSubscription, QObject *parent)
     : QObject(parent),m_pattern(pattern),m_enabled(enabled),m_hash(0)
@@ -56,7 +58,7 @@ UrlAccessRule::~UrlAccessRule()
     delete m_regexp;
 }
 
-Decision UrlAccessRule::decide(const QUrl &url) const
+UrlAccessRule::Decision UrlAccessRule::decide(const QUrl &url) const
 {
     if (!m_enabled)
         return Undecided;
