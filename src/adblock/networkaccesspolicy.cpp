@@ -1,5 +1,6 @@
 /*
  * Copyright 2009 Zsombor Gegesy <gzsombor@gmail.com>
+ * Copyright 2009 Benjamin Meyer <ben@meyerhome.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +20,7 @@
 
 #include "networkaccesspolicy.h"
 
-#include "filtersubscription.h"
+#include "adblocksubscription.h"
 
 #include <qdesktopservices.h>
 #include <qfile.h>
@@ -214,7 +215,7 @@ void NetworkAccessPolicy::setAccessRules(QList<UrlAccessRule*> &newRules)
     save();
 }
 
-void NetworkAccessPolicy::setAccessRules(FilterSubscription *subscription, QList<UrlAccessRule*> &newRules)
+void NetworkAccessPolicy::setAccessRules(AdBlockSubscription *subscription, QList<UrlAccessRule*> &newRules)
 {
 #if defined(NETWORKACCESS_DEBUG)
         qDebug() << "setAccessRules for : " << subscription->name() << " len : " << newRules.size();
@@ -222,12 +223,12 @@ void NetworkAccessPolicy::setAccessRules(FilterSubscription *subscription, QList
 
     for (int i= m_rules->size() - 1; i >= 0; --i) {
         UrlAccessRule *rule = m_rules->at(i);
-        if (rule->filterSubscription() == subscription)
+        if (rule->subscription() == subscription)
             m_rules->removeAt(i);
     }
 
     for (int i = 0; i < newRules.size(); ++i)
-        newRules.at(i)->setFilterSubscription(subscription);
+        newRules.at(i)->setAdBlockSubscription(subscription);
 
     m_rules->append(newRules);
     m_acceptRules.rehash();
@@ -251,27 +252,27 @@ void NetworkAccessPolicy::load()
     settings.beginGroup(QLatin1String("networkAccessPolicy"));
     m_enabled = settings.value(QLatin1String("enabled"), false).toBool();
     m_subscriptions.clear();
-    QList<FilterSubscription> subscriptions = qvariant_cast<QList<FilterSubscription> >(settings.value(QLatin1String("subscriptions")));
-    foreach (const FilterSubscription &subscription, subscriptions)
-        m_subscriptions.append(new FilterSubscription(subscription));
+    QList<AdBlockSubscription> subscriptions = qvariant_cast<QList<AdBlockSubscription> >(settings.value(QLatin1String("subscriptions")));
+    foreach (const AdBlockSubscription &subscription, subscriptions)
+        m_subscriptions.append(new AdBlockSubscription(subscription));
     if (!settings.contains(QLatin1String("subscriptions"))) {
         // initialize
-        FilterSubscription *d1 = new FilterSubscription;
+        AdBlockSubscription *d1 = new AdBlockSubscription;
         d1->setName(QLatin1String("EasyList (USA)"));
         d1->setUrl(QString(QLatin1String("http://adblockplus.mozdev.org/easylist/easylist.txt")));
         d1->setPriority(0);
 
-        FilterSubscription *d2 = new FilterSubscription;
+        AdBlockSubscription *d2 = new AdBlockSubscription;
         d2->setName(QLatin1String("EasyList Germany"));
         d2->setUrl(QString(QLatin1String("http://adblockplus.mozdev.org/easylist/ares+easylist.txt")));
         d2->setPriority(1);
 
-        FilterSubscription *d3 = new FilterSubscription;
+        AdBlockSubscription *d3 = new AdBlockSubscription;
         d3->setName(QLatin1String("Liste FR (France) + EasyList"));
         d3->setUrl(QString(QLatin1String("http://adblockplus.mozdev.org/easylist/liste_fr+easylist.txt")));
         d3->setPriority(2);
 
-        FilterSubscription *d4 = new FilterSubscription;
+        AdBlockSubscription *d4 = new AdBlockSubscription;
         d4->setName(QLatin1String("Filter von Dr.Evil (Germany)"));
         d4->setPriority(3);
         d4->setUrl(QString(QLatin1String("http://maltekraus.de/Firefox/adblock.txt")));
@@ -299,7 +300,7 @@ void NetworkAccessPolicy::load()
     qDebug()<< "subscription for " << pattern << " is " << subIndex;
 #endif
         if (subIndex >= 0)
-            rule->setFilterSubscription(m_subscriptions.at(subIndex));
+            rule->setAdBlockSubscription(m_subscriptions.at(subIndex));
         m_rules->append(rule);
     }
     settings.endArray();
@@ -329,7 +330,7 @@ void NetworkAccessPolicy::save()
         settings.setValue(QLatin1String("enabled"), rule->isEnabled());
         int index = -1;
 
-        FilterSubscription *subscription = rule->filterSubscription();
+        AdBlockSubscription *subscription = rule->subscription();
         if (subscription)
             index = subscription->priority();
 
@@ -337,9 +338,9 @@ void NetworkAccessPolicy::save()
     }
     settings.endArray();
 
-    QList<FilterSubscription> subscriptions;
-    foreach (const FilterSubscription *subscription, m_subscriptions)
-        subscriptions.append(FilterSubscription(*subscription));
+    QList<AdBlockSubscription> subscriptions;
+    foreach (const AdBlockSubscription *subscription, m_subscriptions)
+        subscriptions.append(AdBlockSubscription(*subscription));
     QVariant v = qVariantFromValue(subscriptions);
     settings.setValue(QLatin1String("subscriptions"), v);
     settings.endGroup();

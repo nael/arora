@@ -30,7 +30,7 @@
 #include <qdebug.h>
 #endif
 
-SubscriptionDownload::SubscriptionDownload(NetworkAccessPolicy *policy, FilterSubscription *destination,
+SubscriptionDownload::SubscriptionDownload(NetworkAccessPolicy *policy, AdBlockSubscription *destination,
                                            SubscriptionTableModel *tableModel, const QModelIndex &index)
     : m_index(index)
 {

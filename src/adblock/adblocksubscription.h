@@ -18,18 +18,18 @@
  * Boston, MA  02110-1301  USA
  */
 
-#ifndef FILTERSUBSCRIPTION_H
-#define FILTERSUBSCRIPTION_H
+#ifndef ADBLOCKSUBSCRIPTION_H
+#define ADBLOCKSUBSCRIPTION_H
 
 #include <qdatetime.h>
 #include <qurl.h>
 #include <qmetatype.h>
 
-class FilterSubscription
+class AdBlockSubscription
 {
 
 public:
-    FilterSubscription();
+    AdBlockSubscription();
 
     int priority() const;
     void setPriority(int priority);
@@ -46,8 +46,8 @@ public:
     void setEnabled(bool enabled);
     bool isEnabled() const;
 
-    static void load(QDataStream &in, FilterSubscription &metaData);
-    static void save(QDataStream &out, const FilterSubscription &metaData);
+    static void load(QDataStream &in, AdBlockSubscription &subscription);
+    static void save(QDataStream &out, const AdBlockSubscription &subscription);
 
     // static void parseUrl(const QUrl &url);
     // "abp:subscribe?location=http%3A%2F%2Feasylist.adblockplus.org%2Feasylist.txt&title=EasyList"
@@ -58,12 +58,13 @@ private:
     QByteArray m_url;
     QDate m_lastFetchedDate;
     bool m_enabled;
+    // QList<AdBlockFilter> rules
 };
 
-QDataStream &operator<<(QDataStream &, const FilterSubscription &);
-QDataStream &operator>>(QDataStream &, FilterSubscription &);
+QDataStream &operator<<(QDataStream &, const AdBlockSubscription &subscription);
+QDataStream &operator>>(QDataStream &, AdBlockSubscription &subscription);
 
-Q_DECLARE_METATYPE(FilterSubscription)
-Q_DECLARE_METATYPE(QList<FilterSubscription>)
+Q_DECLARE_METATYPE(AdBlockSubscription)
+Q_DECLARE_METATYPE(QList<AdBlockSubscription>)
 
 #endif // FILTERSUBSCRIPTION_H

@@ -18,77 +18,77 @@
  * Boston, MA  02110-1301  USA
  */
 
-#include "filtersubscription.h"
+#include "adblocksubscription.h"
 
-FilterSubscription::FilterSubscription()
+AdBlockSubscription::AdBlockSubscription()
     : m_priority(0)
     , m_enabled(false)
 {
 }
 
-void FilterSubscription::setPriority(int priority)
+void AdBlockSubscription::setPriority(int priority)
 {
     m_priority = priority;
 }
 
-int FilterSubscription::priority() const
+int AdBlockSubscription::priority() const
 {
     return m_priority;
 }
 
-void FilterSubscription::setName(const QString &name)
+void AdBlockSubscription::setName(const QString &name)
 {
     m_name = name;
 }
 
-QString FilterSubscription::name() const
+QString AdBlockSubscription::name() const
 {
     return m_name;
 }
 
-void FilterSubscription::setUrl(const QUrl &url)
+void AdBlockSubscription::setUrl(const QUrl &url)
 {
     m_url = url.toEncoded();
 }
 
-QUrl FilterSubscription::url() const
+QUrl AdBlockSubscription::url() const
 {
     return QUrl::fromEncoded(m_url);
 }
 
-void FilterSubscription::setLastFetchedDate(const QDate &date)
+void AdBlockSubscription::setLastFetchedDate(const QDate &date)
 {
     m_lastFetchedDate = date;
 }
 
-QDate FilterSubscription::lastFetchedDate() const
+QDate AdBlockSubscription::lastFetchedDate() const
 {
     return m_lastFetchedDate;
 }
 
-void FilterSubscription::setEnabled(bool enabled)
+void AdBlockSubscription::setEnabled(bool enabled)
 {
     m_enabled = enabled;
 }
 
-bool FilterSubscription::isEnabled() const
+bool AdBlockSubscription::isEnabled() const
 {
     return m_enabled;
 }
 
-QDataStream &operator>>(QDataStream &in, FilterSubscription &subscription)
+QDataStream &operator>>(QDataStream &in, AdBlockSubscription &subscription)
 {
-    FilterSubscription::load(in, subscription);
+    AdBlockSubscription::load(in, subscription);
     return in;
 }
 
-QDataStream &operator<<(QDataStream &out, const FilterSubscription &subscription)
+QDataStream &operator<<(QDataStream &out, const AdBlockSubscription &subscription)
 {
-    FilterSubscription::save(out, subscription);
+    AdBlockSubscription::save(out, subscription);
     return out;
 }
 
-void FilterSubscription::load(QDataStream &in, FilterSubscription &subscription)
+void AdBlockSubscription::load(QDataStream &in, AdBlockSubscription &subscription)
 {
     in >> subscription.m_priority;
     in >> subscription.m_name;
@@ -97,7 +97,7 @@ void FilterSubscription::load(QDataStream &in, FilterSubscription &subscription)
     in >> subscription.m_enabled;
 }
 
-void FilterSubscription::save(QDataStream &out, const FilterSubscription &subscription)
+void AdBlockSubscription::save(QDataStream &out, const AdBlockSubscription &subscription)
 {
     out << subscription.priority();
     out << subscription.name();
@@ -105,3 +105,4 @@ void FilterSubscription::save(QDataStream &out, const FilterSubscription &subscr
     out << subscription.lastFetchedDate();
     out << subscription.isEnabled();
 }
+

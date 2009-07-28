@@ -23,7 +23,7 @@
 #include <qdebug.h>
 #endif
 
-SubscriptionTableModel::SubscriptionTableModel(QList<FilterSubscription*> &subscription)
+SubscriptionTableModel::SubscriptionTableModel(QList<AdBlockSubscription*> &subscription)
     : m_subscriptions(subscription)
 {
 }
@@ -80,7 +80,7 @@ int SubscriptionTableModel::rowCount(const QModelIndex &parent) const
     return m_subscriptions.size();
 }
 
-FilterSubscription *SubscriptionTableModel::at(int index) const
+AdBlockSubscription *SubscriptionTableModel::at(int index) const
 {
     return m_subscriptions.at(index);
 }

@@ -24,7 +24,7 @@
 #include <qregexp.h>
 #include <qurl.h>
 
-class FilterSubscription;
+class AdBlockSubscription;
 class UrlAccessRule: public QObject
 {
 public:
@@ -32,7 +32,7 @@ public:
         Undecided, Allow, Deny
     };
     UrlAccessRule(bool wildcard, const QString &pattern, bool exception, int hitCount, bool enabled = true,
-                  FilterSubscription *filterSubscription = 0, QObject *parent = 0);
+                  AdBlockSubscription *AdBlockSubscription = 0, QObject *parent = 0);
     ~UrlAccessRule();
     Decision decide(const QUrl &url) const;
 
@@ -47,8 +47,8 @@ public:
     void setHitCount(int newCount);
     void incrementHitCount();
 
-    FilterSubscription *filterSubscription() const;
-    void setFilterSubscription(FilterSubscription *newSubs);
+    AdBlockSubscription *subscription() const;
+    void setAdBlockSubscription(AdBlockSubscription *newSubs);
     void setEnabled(bool enabled);
 
     bool isEditable() const;
@@ -69,7 +69,7 @@ private:
     int m_hitCount;
     QString m_pattern;
     QRegExp *m_regexp;
-    FilterSubscription *m_subscription;
+    AdBlockSubscription *m_subscription;
     QString *m_hash;
 };
 
