@@ -123,23 +123,140 @@ void tst_AdBlockFilter::match_data()
                     << QUrl("http://gooddomain.example/analyze?http://baddomain.example.")
                     << false;
 
-    QTest::newRow("m5") << QString("||example.com/banner.gif")
+    QTest::newRow("m7") << QString("||example.com/banner.gif")
                     << QUrl("http://example.com/banner.gif")
                     << true;
-    QTest::newRow("m5") << QString("||example.com/banner.gif")
+    QTest::newRow("m8") << QString("||example.com/banner.gif")
                     << QUrl("https://example.com/banner.gif")
                     << true;
-    QTest::newRow("m5") << QString("||example.com/banner.gif")
+    QTest::newRow("m9") << QString("||example.com/banner.gif")
                     << QUrl("http://www.example.com/banner.gif")
                     << true;
 
-    QTest::newRow("m5") << QString("||example.com/banner.gif")
+    QTest::newRow("m10") << QString("||example.com/banner.gif")
                     << QUrl("http://badexample.com/banner.gif")
                     << false;
-    QTest::newRow("m5") << QString("||example.com/banner.gif")
+    QTest::newRow("m10") << QString("||example.com/banner.gif")
                     << QUrl("http://gooddomain.example/analyze?http://example.com/banner.gif")
                     << false;
 
+    // Marking separate characters
+    QTest::newRow("s0") << QString("http://example.com^")
+                         << QUrl("http://example.com/")
+                         << true;
+    QTest::newRow("s1") << QString("http://example.com^")
+                         << QUrl("http://example.com:8000/")
+                         << true;
+    QTest::newRow("s2") << QString("http://example.com^")
+                         << QUrl("http://example.com.ar/")
+                         << false;
+    QTest::newRow("s3") << QString("^example.com^")
+                         << QUrl("http://example.com:8000/foo.bar?a=12&b=%D1%82%D0%B5%D1%81%D1%82")
+                         << true;
+    QTest::newRow("s4") << QString("^%D1%82%D0%B5%D1%81%D1%82^")
+                         << QUrl("http://example.com:8000/foo.bar?a=12&b=%D1%82%D0%B5%D1%81%D1%82")
+                         << true;
+    QTest::newRow("s5") << QString("^foo.bar^")
+                         << QUrl("http://example.com:8000/foo.bar?a=12&b=%D1%82%D0%B5%D1%81%D1%82")
+                         << true;
+
+    // Comments
+    QTest::newRow("c0") << QString("!foo.bar")
+                        << QUrl("!foo.bar")
+                        << false;
+    QTest::newRow("c1") << QString("!foo.bar")
+                        << QUrl("foo.bar")
+                        << false;
+
+    // Specifying filter options
+    // type
+    QTest::newRow("o0") << QString("*/ads/*$script,image,background,stylesheet,object,xbl,ping,xmlhttprequest,object-subrequest,object-subrequest,dtd,subdocument,document,other")
+                        << QUrl("foo.bar/ads/foo.jpg")
+                        << false;
+    // Inverse type
+    QTest::newRow("o1") << QString("*/ads/*$~script, ~image, ~background, ~stylesheet, ~object, ~xbl, ~ping, ~xmlhttprequest, ~object-subrequest, ~dtd, ~subdocument, ~document, ~other")
+                        << QUrl("foo.bar/ads/foo.jpg")
+                        << false;
+    // Restriction to third-party/first-party requests
+    QTest::newRow("o2") << QString("*/ads/*$third-party")
+                        << QUrl("foo.bar/ads/foo.jpg")
+                        << false;
+    QTest::newRow("o3") << QString("*/ads/*$first-party")
+                        << QUrl("foo.bar/ads/foo.jpg")
+                        << false;
+    // Domain restrictions
+    QTest::newRow("o4") << QString("*/ads/*$domain=example.com|example.net")
+                        << QUrl("http://example.com/ads/foo.jpg")
+                        << true;
+    QTest::newRow("o5") << QString("*/ads/*$domain=example.com")
+                        << QUrl("http://foo.com/ads/foo.jpg")
+                        << false;
+
+    QTest::newRow("o6") << QString("*/ads/*$domain=~example.com")
+                        << QUrl("http://foo.com/ads/foo.jpg")
+                        << true;
+    QTest::newRow("o7") << QString("*/ads/*$domain=~example.com")
+                        << QUrl("http://example.com/ads/foo.jpg")
+                        << false;
+    QTest::newRow("o8") << QString("*/ads/*$domain=example.com|~foo.example.com")
+                        << QUrl("http://example.com/ads/foo.jpg")
+                        << true;
+    QTest::newRow("o9") << QString("*/ads/*$domain=example.com|~foo.example.com")
+                        << QUrl("http://foo.example.com/ads/foo.jpg")
+                        << false;
+    QTest::newRow("o10") << QString("*/ads/*$domain=example.com|~foo.example.com")
+                        << QUrl("http://bar.example.com/ads/foo.jpg")
+                        << true;
+    // match-case
+    QTest::newRow("o11") << QString("*/BannerAd.gif$match-case")
+                         << QUrl("http://example.com/BannerAd.gif")
+                         << true;
+    QTest::newRow("o12") << QString("*/BannerAd.gif$match-case")
+                         << QUrl("http://example.com/bannerad.gif")
+                         << false;
+    // collapse
+    // TODO test collapse somehow
+    QTest::newRow("o11") << QString("*/BannerAd.gif$collapse")
+                         << QUrl("http://example.com/bannerad.gif")
+                         << true;
+    QTest::newRow("o12") << QString("*/BannerAd.gif$~collapse")
+                         << QUrl("http://example.com/bannerad.gif")
+                         << true;
+
+    // Regular expressions
+    QTest::newRow("r0") << QString("/banner\\d+/")
+                         << QUrl("banner123")
+                         << true;
+    QTest::newRow("r1") << QString("/banner\\d+/")
+                         << QUrl("banner321")
+                         << true;
+    QTest::newRow("r2") << QString("/banner\\d+/")
+                         << QUrl("banners")
+                         << false;
+
+    // Element hiding
+    // TODO
+    QTest::newRow("e0") << QString("##div.textad")
+                        << QUrl()
+                        << false;
+    QTest::newRow("e1") << QString("##div#sponsorad")
+                        << QUrl()
+                        << false;
+    QTest::newRow("e1") << QString("##*#sponsorad")
+                        << QUrl()
+                        << false;
+    QTest::newRow("e1") << QString("##textad")
+                        << QUrl()
+                        << false;
+    QTest::newRow("e1") << QString("example.com##*.sponsor")
+                        << QUrl("example.com")
+                        << false;
+    QTest::newRow("e1") << QString("example.com,example.net##*.sponsor")
+                        << QUrl("example.com")
+                        << false;
+    // TODO more
+    // Attribute selectors
+    // Advanced selectors
 }
 
 // public bool match(const QUrl &url) const
