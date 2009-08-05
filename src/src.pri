@@ -44,6 +44,7 @@ FORMS += \
 HEADERS += \
     aboutdialog.h \
     acceptlanguagedialog.h \
+    autofillmanager.h \
     browserapplication.h \
     browsermainwindow.h \
     clearprivatedata.h \
@@ -71,6 +72,7 @@ HEADERS += \
 SOURCES += \
     aboutdialog.cpp \
     acceptlanguagedialog.cpp \
+    autofillmanager.cpp \
     browserapplication.cpp \
     browsermainwindow.cpp \
     clearprivatedata.cpp \

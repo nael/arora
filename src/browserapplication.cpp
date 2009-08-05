@@ -62,6 +62,7 @@
 
 #include "browserapplication.h"
 
+#include "autofillmanager.h"
 #include "bookmarksmanager.h"
 #include "browsermainwindow.h"
 #include "cookiejar.h"
@@ -88,6 +89,7 @@ HistoryManager *BrowserApplication::s_historyManager = 0;
 NetworkAccessManager *BrowserApplication::s_networkAccessManager = 0;
 BookmarksManager *BrowserApplication::s_bookmarksManager = 0;
 LanguageManager *BrowserApplication::s_languageManager = 0;
+AutoFillManager *BrowserApplication::s_autoFillManager = 0;
 
 BrowserApplication::BrowserApplication(int &argc, char **argv)
     : SingleApplication(argc, argv)
@@ -155,6 +157,7 @@ BrowserApplication::~BrowserApplication()
     qDeleteAll(m_mainWindows);
     delete s_networkAccessManager;
     delete s_bookmarksManager;
+    delete s_autoFillManager;
 }
 
 #if defined(Q_WS_MAC)
@@ -545,6 +548,14 @@ LanguageManager *BrowserApplication::languageManager()
                 qApp, SLOT(retranslate()));
     }
     return s_languageManager;
+}
+
+AutoFillManager *BrowserApplication::autoFillManager()
+{
+    if (!s_autoFillManager) {
+        s_autoFillManager = new AutoFillManager;
+    }
+    return s_autoFillManager;
 }
 
 QIcon BrowserApplication::icon(const QUrl &url)

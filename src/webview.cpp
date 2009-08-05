@@ -64,6 +64,7 @@
 
 #include "webview.h"
 
+#include "autofillmanager.h"
 #include "addbookmarkdialog.h"
 #include "bookmarksmanager.h"
 #include "browserapplication.h"
@@ -536,6 +537,7 @@ void WebView::loadFinished()
                    << "Url:" << url();
     }
     m_progress = 0;
+    BrowserApplication::instance()->autoFillManager()->fill(page());
 }
 
 void WebView::loadUrl(const QUrl &url, const QString &title)

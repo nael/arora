@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 Benjamin C. Meyer <ben@meyerhome.net>
+ * Copyright 2008-2009 Benjamin C. Meyer <ben@meyerhome.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,6 +63,7 @@
 #include "networkaccessmanager.h"
 
 #include "acceptlanguagedialog.h"
+#include "autofillmanager.h"
 #include "browserapplication.h"
 #include "browsermainwindow.h"
 #include "schemeaccesshandler.h"
@@ -355,6 +356,11 @@ void NetworkAccessManager::sslErrors(QNetworkReply *reply, const QList<QSslError
 
 QNetworkReply *NetworkAccessManager::createRequest(QNetworkAccessManager::Operation op, const QNetworkRequest &request, QIODevice *outgoingData)
 {
+    if (op == PostOperation && outgoingData) {
+        QByteArray outgoingDataByteArray = outgoingData->peek(INT_MAX);
+        BrowserApplication::autoFillManager()->post(request, outgoingDataByteArray);
+    }
+
     QNetworkReply *reply = 0;
 
     // Check if there is a valid handler registered for the requested URL scheme
@@ -375,3 +381,4 @@ QNetworkReply *NetworkAccessManager::createRequest(QNetworkAccessManager::Operat
 
     return reply;
 }
+
