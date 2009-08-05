@@ -41,12 +41,15 @@ class AutoFillManager : public QObject
 
 public:
     AutoFillManager(QObject *parent = 0);
+    ~AutoFillManager();
 
     void post(const QNetworkRequest &request, const QByteArray &outgoingData);
     void fill(QWebPage *page);
 
 private:
     static QUrl stripUrl(const QUrl &url);
+    static QString autoFillDataFile();
+
     void store(const QUrl &url, const QByteArray &data);
     void save();
     void load();

@@ -28,10 +28,15 @@
 
 #include "autofillmanager.h"
 
+#include "browserapplication.h"
+#include "browsermainwindow.h"
+
 #include <qdebug.h>
+#include <qdesktopservices.h>
+#include <qfile.h>
 #include <qmessagebox.h>
-#include <qurl.h>
 #include <qsettings.h>
+#include <qurl.h>
 #include <qwebframe.h>
 #include <qwebpage.h>
 
@@ -42,9 +47,15 @@ AutoFillManager::AutoFillManager(QObject *parent)
     : QObject(parent)
     , m_enabled(true)
 {
+    load();
     QSettings settings;
     settings.beginGroup(QLatin1String("AutoFill"));
     m_enabled = settings.value(QLatin1String("enabled"), m_enabled).toBool();
+}
+
+AutoFillManager::~AutoFillManager()
+{
+    save();
 }
 
 // TODO for a kde/gnome/osx/backend?
@@ -53,17 +64,59 @@ void AutoFillManager::store(const QUrl &url, const QByteArray &data)
     // TODO
     // store multiple data for one url
     // separate passwords from normal forms?
+#ifdef AUTOFILL_DEBUG
     qDebug() << "Saving" << url << data;
+#endif
     m_data.insert(url.toEncoded(), data);
 }
+/*
+static rot13(const QByteArray data)
+{
+    QByteArray r;
+    for (int i = 0; i < data.count(); ++i)
+        r += data[i] + 13;
+    return r;
+}*/
 
-// TODO
+QString AutoFillManager::autoFillDataFile()
+{
+    QString fileName = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+    fileName += QLatin1String("/autofile.dat");
+    return fileName;
+}
+
 void AutoFillManager::save()
 {
+    QString fileName = autoFillDataFile();
+    QFile file(fileName);
+    if (!file.open(QFile::WriteOnly)) {
+        qWarning() << "Unable to open" << fileName << "to store autofill data";
+        return;
+    }
+
+    QTextStream stream(&file);
+    QHashIterator<QByteArray, QByteArray> i(m_data);
+    while (i.hasNext()) {
+        i.next();
+        stream << i.key() << endl << i.value() << endl;
+    }
 }
 
 void AutoFillManager::load()
 {
+    QString fileName = autoFillDataFile();
+    QFile file(fileName);
+    if (!file.open(QFile::ReadOnly))
+        return;
+
+    QTextStream stream(&file);
+    while (!stream.atEnd()) {
+        QByteArray key = stream.readLine().toUtf8();
+        if (stream.atEnd())
+            break;
+        QByteArray value = stream.readLine().toUtf8();
+        m_data.insert(key, value);
+    }
 }
 
 void AutoFillManager::post(const QNetworkRequest &request, const QByteArray &outgoingData)
@@ -80,17 +133,20 @@ void AutoFillManager::post(const QNetworkRequest &request, const QByteArray &out
     QUrl url = QUrl::fromEncoded(refererHeader);
     url = stripUrl(url);
 
-    // TODO Only for passwords
-    if (!m_data.contains(url.toEncoded())
-        && !m_never.contains(url)) {
-        QMessageBox messageBox;
-        messageBox.setText(tr("<b>Would you like to save this password?</b><br> \
+    if (m_never.contains(url))
+        return;
+
+    // TODO Determine if it is a password by checking the dom rather then this hack
+    bool password = outgoingData.contains("&pass");
+    if (password && !m_data.contains(url.toEncoded())) {
+        QMessageBox *messageBox = new QMessageBox(BrowserApplication::instance()->mainWindow());
+        messageBox->setText(tr("<b>Would you like to save this password?</b><br> \
         To review passwords you have saved and remove them, open the AutoFill pane of preferences."));
-        messageBox.addButton(tr("Never for this site"), QMessageBox::DestructiveRole);
-        messageBox.addButton(tr("Not now"), QMessageBox::RejectRole);
-        messageBox.addButton(QMessageBox::Yes);
-        messageBox.setDefaultButton(QMessageBox::Yes);
-        switch (messageBox.exec()) {
+        messageBox->addButton(tr("Never for this site"), QMessageBox::DestructiveRole);
+        messageBox->addButton(tr("Not now"), QMessageBox::RejectRole);
+        messageBox->addButton(QMessageBox::Yes);
+        messageBox->setDefaultButton(QMessageBox::Yes);
+        switch (messageBox->exec()) {
         case QMessageBox::DestructiveRole:
             m_never.append(url);
             // fall through
@@ -99,6 +155,7 @@ void AutoFillManager::post(const QNetworkRequest &request, const QByteArray &out
         default:
             break;
         }
+        messageBox->deleteLater();
     }
     store(url, outgoingData);
 }
@@ -124,6 +181,9 @@ void AutoFillManager::fill(QWebPage *page)
 
     QUrl url = page->mainFrame()->url();
     url = stripUrl(url);
+
+    if (!m_data.contains(url.toEncoded()))
+        return;
 
     QByteArray data = m_data[url.toEncoded()];
     if (data.isEmpty())
