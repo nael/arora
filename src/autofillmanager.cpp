@@ -81,7 +81,7 @@ static rot13(const QByteArray data)
 QString AutoFillManager::autoFillDataFile()
 {
     QString fileName = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
-    fileName += QLatin1String("/autofile.dat");
+    fileName += QLatin1String("/autofill.dat");
     return fileName;
 }
 
