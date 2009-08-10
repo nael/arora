@@ -270,6 +270,9 @@ void TabWidget::currentChanged(int index)
     connect(webView, SIGNAL(loadProgress(int)),
             this, SIGNAL(loadProgress(int)));
 
+    WebViewWithSearch *webViewWithSearch = qobject_cast<WebViewWithSearch*>(widget(index));
+    webViewWithSearch->acquireNavigationBar();
+
     for (int i = 0; i < m_actions.count(); ++i) {
         WebActionMapper *mapper = m_actions[i];
         mapper->updateCurrent(webView->page());

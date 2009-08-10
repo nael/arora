@@ -26,6 +26,7 @@
 
 QT_BEGIN_NAMESPACE
 class QWebView;
+class QVBoxLayout;
 QT_END_NAMESPACE
 
 class WebViewSearch : public SearchBar
@@ -55,8 +56,13 @@ class WebViewWithSearch : public QWidget
 
 public:
     WebViewWithSearch(WebView *webView, QWidget *parent = 0);
+    void acquireNavigationBar();
+
     WebView *m_webView;
     WebViewSearch *m_webViewSearch;
+
+private:
+    QVBoxLayout* m_layout;
 };
 
 

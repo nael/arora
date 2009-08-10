@@ -414,6 +414,11 @@ QAction *BrowserMainWindow::showMenuBarAction() const
     return m_viewShowMenuBarAction;
 }
 
+QToolBar *BrowserMainWindow::navigationBar() const
+{
+    return m_navigationBar;
+}
+
 void BrowserMainWindow::setupMenu()
 {
     m_menuBarVisible = true;
@@ -911,7 +916,6 @@ void BrowserMainWindow::setupToolBar()
 {
     setUnifiedTitleAndToolBarOnMac(true);
     m_navigationBar = new QToolBar(this);
-    addToolBar(m_navigationBar);
 
     m_historyBackAction->setIcon(style()->standardIcon(QStyle::SP_ArrowBack, 0, this));
     m_historyBackMenu = new QMenu(this);

@@ -75,6 +75,7 @@ class TabWidget;
 class ToolbarSearch;
 class WebView;
 class QSplitter;
+class QToolBar;
 class QFrame;
 class HistoryMenu;
 class BookmarksMenuBarMenu;
@@ -103,6 +104,7 @@ public:
     QByteArray saveState(bool withTabs = true) const;
     bool restoreState(const QByteArray &state);
     QAction *showMenuBarAction() const;
+    QToolBar* navigationBar() const;
 
 public slots:
     void goHome();

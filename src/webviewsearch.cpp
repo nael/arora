@@ -18,6 +18,8 @@
  */
 
 #include "webviewsearch.h"
+#include "browserapplication.h"
+#include "browsermainwindow.h"
 
 #include <qevent.h>
 #include <qshortcut.h>
@@ -27,6 +29,8 @@
 #include <qwebview.h>
 
 #include <qdebug.h>
+
+#include <qtoolbar.h>
 
 WebViewSearch::WebViewSearch(QWebView *webView, QWidget *parent)
     : SearchBar(parent)
@@ -82,12 +86,16 @@ WebViewWithSearch::WebViewWithSearch(WebView *webView, QWidget *parent)
     , m_webView(webView)
 {
     m_webView->setParent(this);
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->setSpacing(0);
-    layout->setContentsMargins(0, 0, 0, 0);
+    m_layout = new QVBoxLayout;
+    m_layout->setSpacing(0);
+    m_layout->setContentsMargins(0, 0, 0, 0);
     m_webViewSearch = new WebViewSearch(m_webView, this);
-    layout->addWidget(m_webViewSearch);
-    layout->addWidget(m_webView);
-    setLayout(layout);
+    m_layout->addWidget(m_webViewSearch);
+    m_layout->addWidget(m_webView);
+    setLayout(m_layout);
 }
 
+void WebViewWithSearch::acquireNavigationBar()
+{
+    m_layout->insertWidget(0, BrowserApplication::instance()->mainWindow()->navigationBar());
+}
