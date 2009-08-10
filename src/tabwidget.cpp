@@ -885,6 +885,13 @@ void TabWidget::loadSettings()
         if (v && v->page())
             v->loadSettings();
     }
+    QSettings settings;
+    settings.beginGroup(QLatin1String("navbar"));
+    if(settings.value(QLatin1String("position"), BrowserMainWindow::Inside).toInt() == BrowserMainWindow::Inside) {
+        WebViewWithSearch* w = qobject_cast<WebViewWithSearch*>(widget(currentIndex()));
+        if(w != 0) w->acquireNavigationBar();
+    }
+    settings.endGroup();
 }
 
 /*

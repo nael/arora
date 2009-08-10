@@ -397,6 +397,16 @@ bool BrowserMainWindow::restoreState(const QByteArray &state)
     return true;
 }
 
+void BrowserMainWindow::loadSettings()
+{
+    QSettings settings;
+    settings.beginGroup(QLatin1String("navbar"));
+    if(settings.value(QLatin1String("position"), Inside).toInt() == Outside)
+        addToolBar(navigationBar());
+    settings.endGroup();
+    m_tabWidget->loadSettings();
+}
+
 void BrowserMainWindow::lastTabClosed()
 {
     QSettings settings;
