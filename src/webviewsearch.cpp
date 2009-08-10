@@ -97,5 +97,11 @@ WebViewWithSearch::WebViewWithSearch(WebView *webView, QWidget *parent)
 
 void WebViewWithSearch::acquireNavigationBar()
 {
-    m_layout->insertWidget(0, BrowserApplication::instance()->mainWindow()->navigationBar());
+    QWidget* topLevel = this->topLevelWidget();
+    BrowserMainWindow* mainWindow = qobject_cast<BrowserMainWindow*>(topLevel);
+    if(mainWindow == 0) {
+        qDebug("Could not find my main window");
+        mainWindow = BrowserApplication::instance()->mainWindow();
+    }
+    m_layout->insertWidget(0, mainWindow->navigationBar());
 }
