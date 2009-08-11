@@ -269,9 +269,10 @@ void TabWidget::currentChanged(int index)
             this, SIGNAL(linkHovered(const QString&)));
     connect(webView, SIGNAL(loadProgress(int)),
             this, SIGNAL(loadProgress(int)));
-
-    WebViewWithSearch *webViewWithSearch = qobject_cast<WebViewWithSearch*>(widget(index));
-    webViewWithSearch->acquireNavigationBar();
+    if(m_navigationBarPosition == BrowserMainWindow::Inside) {
+        WebViewWithSearch *webViewWithSearch = qobject_cast<WebViewWithSearch*>(widget(index));
+        webViewWithSearch->acquireNavigationBar();
+    }
 
     for (int i = 0; i < m_actions.count(); ++i) {
         WebActionMapper *mapper = m_actions[i];
@@ -887,7 +888,8 @@ void TabWidget::loadSettings()
     }
     QSettings settings;
     settings.beginGroup(QLatin1String("navbar"));
-    if(settings.value(QLatin1String("position"), BrowserMainWindow::Inside).toInt() == BrowserMainWindow::Inside) {
+    m_navigationBarPosition = (BrowserMainWindow::NavigationBarPosition)settings.value(QLatin1String("position"), BrowserMainWindow::Inside).toInt();
+    if(m_navigationBarPosition == BrowserMainWindow::Inside) {
         WebViewWithSearch* w = qobject_cast<WebViewWithSearch*>(widget(currentIndex()));
         if(w != 0) w->acquireNavigationBar();
     }

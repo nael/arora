@@ -68,6 +68,8 @@
 #include <qwebpage.h>
 #include <qurl.h>
 
+#include "browsermainwindow.h"
+
 QT_BEGIN_NAMESPACE
 class QCompleter;
 class QLabel;
@@ -76,7 +78,6 @@ class QMenu;
 class QStackedWidget;
 QT_END_NAMESPACE
 
-class BrowserMainWindow;
 class TabBar;
 class WebView;
 class WebActionMapper;
@@ -205,6 +206,7 @@ private:
     QCompleter *m_lineEditCompleter;
     QStackedWidget *m_lineEdits;
     TabBar *m_tabBar;
+    BrowserMainWindow::NavigationBarPosition m_navigationBarPosition;
 };
 
 #endif // TABWIDGET_H

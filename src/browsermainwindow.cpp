@@ -224,6 +224,7 @@ BrowserMainWindow::BrowserMainWindow(QWidget *parent, Qt::WindowFlags flags)
     setWindowRole(QLatin1String("browser"));
 #endif
     retranslate();
+    loadSettings();
 }
 
 BrowserMainWindow::~BrowserMainWindow()
@@ -401,6 +402,7 @@ void BrowserMainWindow::loadSettings()
 {
     QSettings settings;
     settings.beginGroup(QLatin1String("navbar"));
+    qDebug() << "BMW::loadSettings() => " << settings.value(QLatin1String("position"), Inside).toInt();
     if(settings.value(QLatin1String("position"), Inside).toInt() == Outside)
         addToolBar(navigationBar());
     settings.endGroup();

@@ -247,18 +247,6 @@ void SettingsDialog::loadFromSettings()
     openTargetBlankLinksIn->setCurrentIndex(settings.value(QLatin1String("openTargetBlankLinksIn"), TabWidget::NewSelectedTab).toInt());
     openLinksFromAppsIn->setCurrentIndex(settings.value(QLatin1String("openLinksFromAppsIn"), TabWidget::NewSelectedTab).toInt());
     settings.endGroup();
-
-    settings.beginGroup(QLatin1String("navbar"));
-    switch(settings.value(QLatin1String("position"), BrowserMainWindow::Inside).toInt()) {
-        case BrowserMainWindow::Outside:
-        outsideNavigationBarRadioButton->setChecked(true);
-        break;
-        case BrowserMainWindow::Inside:
-        default:
-        insideNavigationBarRadioButton->setChecked(true);
-        break;
-    }
-    settings.endGroup();
 }
 
 void SettingsDialog::saveToSettings()
@@ -373,13 +361,6 @@ void SettingsDialog::saveToSettings()
     settings.setValue(QLatin1String("quitAsLastTabClosed"), quitAsLastTabClosed->isChecked());
     settings.setValue(QLatin1String("openTargetBlankLinksIn"), openTargetBlankLinksIn->currentIndex());
     settings.setValue(QLatin1String("openLinksFromAppsIn"), openLinksFromAppsIn->currentIndex());
-    settings.endGroup();
-
-    settings.beginGroup(QLatin1String("navbar"));
-    BrowserMainWindow::NavigationBarPosition pos;
-    if(insideNavigationBarRadioButton->isChecked()) pos = BrowserMainWindow::Inside;
-    else pos = BrowserMainWindow::Outside;
-    settings.setValue(QLatin1String("position"), pos);
     settings.endGroup();
 
     BrowserApplication::instance()->loadSettings();
