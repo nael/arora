@@ -92,6 +92,7 @@
 #include <qstackedwidget.h>
 #include <qstyle.h>
 #include <qtoolbutton.h>
+#include <qtoolbar.h>
 
 #include <qdebug.h>
 
@@ -269,7 +270,8 @@ void TabWidget::currentChanged(int index)
             this, SIGNAL(linkHovered(const QString&)));
     connect(webView, SIGNAL(loadProgress(int)),
             this, SIGNAL(loadProgress(int)));
-    if(m_navigationBarPosition == BrowserMainWindow::Inside) {
+
+    if(BrowserApplication::instance()->navigationBarPosition() == BrowserApplication::Inside) {
         WebViewWithSearch *webViewWithSearch = qobject_cast<WebViewWithSearch*>(widget(index));
         webViewWithSearch->acquireNavigationBar();
     }
@@ -432,8 +434,22 @@ WebView *TabWidget::makeNewTab(bool makeCurrent)
         QWidget *emptyWidget = new QWidget;
         QPalette p = emptyWidget->palette();
         p.setColor(QPalette::Window, palette().color(QPalette::Base));
-        emptyWidget->setPalette(p);
-        emptyWidget->setAutoFillBackground(true);
+        BrowserMainWindow* window;
+        if(BrowserApplication::instance()->navigationBarPosition() == BrowserApplication::Inside
+           && (window = qobject_cast<BrowserMainWindow*>(topLevelWidget())) != 0) {
+            QWidget *blankWidget = new QWidget(emptyWidget);
+            blankWidget->setPalette(p);
+            blankWidget->setAutoFillBackground(true);
+            QVBoxLayout* layout = new QVBoxLayout(emptyWidget);
+            layout->setSpacing(0);
+            layout->setContentsMargins(0, 0, 0, 0);
+            layout->addWidget(window->navigationBar());
+            layout->addWidget(blankWidget);
+            emptyWidget->setLayout(layout);
+        } else {
+            emptyWidget->setPalette(p);
+            emptyWidget->setAutoFillBackground(true);
+        }
         disconnect(this, SIGNAL(currentChanged(int)),
                    this, SLOT(currentChanged(int)));
         addTab(emptyWidget, tr("Untitled"));
@@ -474,8 +490,11 @@ WebView *TabWidget::makeNewTab(bool makeCurrent)
 
     WebViewWithSearch *webViewWithSearch = new WebViewWithSearch(webView, this);
     addTab(webViewWithSearch, tr("Untitled"));
-    if (makeCurrent)
+    if (makeCurrent) {
         setCurrentWidget(webViewWithSearch);
+        if(BrowserApplication::instance()->navigationBarPosition() == BrowserApplication::Inside)
+            webViewWithSearch->acquireNavigationBar();
+    }
 
     // webview actions
     for (int i = 0; i < m_actions.count(); ++i) {
@@ -886,14 +905,6 @@ void TabWidget::loadSettings()
         if (v && v->page())
             v->loadSettings();
     }
-    QSettings settings;
-    settings.beginGroup(QLatin1String("navbar"));
-    m_navigationBarPosition = (BrowserMainWindow::NavigationBarPosition)settings.value(QLatin1String("position"), BrowserMainWindow::Inside).toInt();
-    if(m_navigationBarPosition == BrowserMainWindow::Inside) {
-        WebViewWithSearch* w = qobject_cast<WebViewWithSearch*>(widget(currentIndex()));
-        if(w != 0) w->acquireNavigationBar();
-    }
-    settings.endGroup();
 }
 
 /*

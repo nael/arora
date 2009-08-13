@@ -224,7 +224,10 @@ BrowserMainWindow::BrowserMainWindow(QWidget *parent, Qt::WindowFlags flags)
     setWindowRole(QLatin1String("browser"));
 #endif
     retranslate();
-    loadSettings();
+
+    if(BrowserApplication::instance()->navigationBarPosition() == BrowserApplication::Outside) {
+        addToolBar(navigationBar());
+    }
 }
 
 BrowserMainWindow::~BrowserMainWindow()
@@ -400,11 +403,6 @@ bool BrowserMainWindow::restoreState(const QByteArray &state)
 
 void BrowserMainWindow::loadSettings()
 {
-    QSettings settings;
-    settings.beginGroup(QLatin1String("navbar"));
-    if(settings.value(QLatin1String("position"), Inside).toInt() == Outside)
-        addToolBar(navigationBar());
-    settings.endGroup();
     m_tabWidget->loadSettings();
 }
 

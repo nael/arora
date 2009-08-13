@@ -91,12 +91,6 @@ class BrowserMainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    enum NavigationBarPosition {
-        Outside,
-        Inside
-    };
-
-
     BrowserMainWindow(QWidget *parent = 0, Qt::WindowFlags flags = 0);
     ~BrowserMainWindow();
     QSize sizeHint() const;
@@ -109,7 +103,7 @@ public:
     ToolbarSearch *toolbarSearch() const;
     QByteArray saveState(bool withTabs = true) const;
     bool restoreState(const QByteArray &state);
-    void loadSettings();
+
     QAction *showMenuBarAction() const;
     QToolBar* navigationBar() const;
 
@@ -117,6 +111,8 @@ public slots:
     void goHome();
     void privacyChanged(bool isPrivate);
     void zoomTextOnlyChanged(bool textOnly);
+
+    void loadSettings();
 
 protected:
     void closeEvent(QCloseEvent *event);

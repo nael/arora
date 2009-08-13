@@ -147,6 +147,11 @@ BrowserApplication::BrowserApplication(int &argc, char **argv)
     QTimer::singleShot(0, this, SLOT(postLaunch()));
 #endif
     languageManager();
+
+    // Have to be there, a window might be created before loadSettings()
+    settings.beginGroup(QLatin1String("navbar"));
+    m_navigationBarPosition = (NavigationBarPosition)settings.value(QLatin1String("position"), Inside).toInt();
+    settings.endGroup();
 }
 
 BrowserApplication::~BrowserApplication()
@@ -257,6 +262,10 @@ void BrowserApplication::postLaunch()
         settings.beginGroup(QLatin1String("MainWindow"));
         int startup = settings.value(QLatin1String("startupBehavior")).toInt();
         QStringList args = QCoreApplication::arguments();
+
+        foreach(BrowserMainWindow *mainWindow, m_mainWindows) {
+            mainWindow->loadSettings();
+        }
 
         if (args.count() > 1) {
             QString argumentUrl = parseArgumentUrl(args.last());
@@ -617,3 +626,7 @@ void BrowserApplication::setEventKeyboardModifiers(Qt::KeyboardModifiers modifie
     m_eventKeyboardModifiers = modifiers;
 }
 
+BrowserApplication::NavigationBarPosition BrowserApplication::navigationBarPosition() const
+{
+    return m_navigationBarPosition;
+}

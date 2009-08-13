@@ -82,6 +82,11 @@ class BrowserApplication : public SingleApplication
     Q_OBJECT
 
 public:
+    enum NavigationBarPosition {
+        Outside,
+        Inside
+    };
+
     BrowserApplication(int &argc, char **argv);
     ~BrowserApplication();
     static BrowserApplication *instance();
@@ -113,6 +118,8 @@ public:
 
     static bool isPrivate();
     static void setPrivate(bool isPrivate);
+
+    NavigationBarPosition navigationBarPosition() const;
 
 #if defined(Q_WS_MAC)
     bool event(QEvent *event);
@@ -159,6 +166,8 @@ private:
 
     QUrl m_lastAskedUrl;
     QDateTime m_lastAskedUrlDateTime;
+
+    NavigationBarPosition m_navigationBarPosition;
 };
 
 #endif // BROWSERAPPLICATION_H

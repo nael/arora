@@ -206,7 +206,6 @@ private:
     QCompleter *m_lineEditCompleter;
     QStackedWidget *m_lineEdits;
     TabBar *m_tabBar;
-    BrowserMainWindow::NavigationBarPosition m_navigationBarPosition;
 };
 
 #endif // TABWIDGET_H
